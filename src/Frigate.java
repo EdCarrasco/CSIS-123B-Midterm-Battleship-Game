@@ -1,5 +1,7 @@
 package midterm;
 
+import javafx.scene.image.ImageView;
+
 public class Frigate extends Ship {
     
     private final int[] indexH = {0,4};

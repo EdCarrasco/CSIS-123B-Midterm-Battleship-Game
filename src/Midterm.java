@@ -27,7 +27,7 @@ public class Midterm extends Application {
     
     private Random random = new Random();
     
-    private static final int MAXSHIPS = 16; // original 14
+    private static final int MAXSHIPS = 32; // original 14
     private static final int GRIDSIZE  = 16;
     private static final int IMGSIZE = 16;
     private static final int BORDER = 1;
@@ -38,6 +38,8 @@ public class Midterm extends Application {
     
     private Image[] shipImages = new Image[10];
     private Ship[] ships = new Ship[MAXSHIPS];
+    
+    private Cell cells[][] = new Cell[GRIDSIZE][GRIDSIZE];
     
     @Override
     public void start(Stage primaryStage) {
@@ -70,41 +72,137 @@ public class Midterm extends Application {
                 labelGrid[row][col].setOnMouseClicked(new EventHandler<MouseEvent>() {
                     @Override
                     public void handle(MouseEvent me) {
-                        Label label = new Label();
-                        label.setGraphic(new ImageView(new Image("file:Images\\batt101.gif")));
-                        labelGrid[row][col] = new Label("xxx");
-                        System.out.println(charGrid[row][col]);
-                        /*
-                        boolean shipWasHit = this.checkCell(row, col);
+                        boolean shipWasHit = this.hitCell(row, col);
                         if (shipWasHit) {
-                            
+                            boolean shipSunk = this.checkCell(row, col, 0);
+                            if (shipSunk) {
+                                System.out.println("--- SUNK ---");
+                                this.sinkShip(row, col, 0);
+                            }
                         }
-                        */
                     }
                     
-                    public boolean checkCell(int row, int col) {
-                        String message = "(" + row + "," + col + ") .. ";
-                        boolean shipWasHit = false;
-                        char c = charGrid[row][col];
-                        /*if (c == 'O') {
-                            message += "miss";
-                            labelGrid[row][col].setGraphic(Ship.getMissImageView());
+                    public void sinkShip(int row, int col, int dir) {
+                        Cell c = cells[row][col];
+                        if (c == Cell.SunkHor) {
+                            labelGrid[row][col].setGraphic(new ImageView(new Image("file:Images\\batt204.gif")));
+                            if (dir == 0) {
+                                this.sinkShip(row, col+1, 1);
+                                this.sinkShip(row, col-1, -1);
+                            }
+                            else {
+                                this.sinkShip(row, col+dir, dir);
+                            }
                         }
-                        else if (c == 'X') {
-                            message += "already hit";
+                        else if (c == Cell.SunkLeft) {
+                            labelGrid[row][col].setGraphic(new ImageView(new Image("file:Images\\batt201.gif")));
+                            if (dir == 0)
+                                this.sinkShip(row, col+1, 1); 
                         }
-                        else if (c == 'F' || c == 'M' || c == 'C' || c == 'B') {
-                            message += "HIT";
-                            charGrid[row][col] = 'X';
-                            labelGrid[row][col].setGraphic(Ship.getHitImageView());
-                            shipWasHit = true;
+                        else if (c == Cell.SunkRight) {
+                            labelGrid[row][col].setGraphic(new ImageView(new Image("file:Images\\batt205.gif")));
+                            if (dir == 0)
+                                this.sinkShip(row, col-1, -1); 
+                        }
+                        else if (c == Cell.SunkVer) {
+                            labelGrid[row][col].setGraphic(new ImageView(new Image("file:Images\\batt207.gif")));
+                            if (dir == 0) {
+                                this.sinkShip(row+1, col, 1);
+                                this.sinkShip(row-1, col, -1);
+                            }
+                            else {
+                                this.sinkShip(row+dir, col, dir);
+                            }
+                        }
+                        else if (c == Cell.SunkTop) {
+                            labelGrid[row][col].setGraphic(new ImageView(new Image("file:Images\\batt206.gif")));
+                            if (dir == 0)
+                                this.sinkShip(row+1, col, 1); 
+                        }
+                        else if (c == Cell.SunkBottom) {
+                            labelGrid[row][col].setGraphic(new ImageView(new Image("file:Images\\batt210.gif")));
+                            if (dir == 0)
+                                this.sinkShip(row-1, col, -1); 
+                        }
+                    }
+                    
+                    public boolean checkCell(int row, int col, int dir) {
+                        Cell c = cells[row][col];
+                        
+                        if (c == Cell.ShipHor || c == Cell.ShipLeft || c == Cell.ShipRight || 
+                            c == Cell.ShipVer || c == Cell.ShipTop || c == Cell.ShipBottom)
+                            return false;
+                        
+                        if (c == Cell.SunkHor) {
+                            if (dir == 0) {
+                                return this.checkCell(row, col+1, 1) 
+                                    && this.checkCell(row, col-1, -1);
+                            }
+                            else {
+                                return this.checkCell(row, col+dir, dir);
+                            }
+                        }
+                        else if (c == Cell.SunkLeft) {
+                            if (dir == 0)
+                                return this.checkCell(row, col+1, 1);
+                            else
+                                return true;
+                        }
+                        else if (c == Cell.SunkRight) {
+                            if (dir == 0)
+                                return this.checkCell(row, col-1, -1);
+                            else
+                                return true;
+                        }
+                        else if (c == Cell.SunkVer) {
+                            if (dir == 0) {
+                                return this.checkCell(row+1, col, 1) 
+                                    && this.checkCell(row-1, col, -1);
+                            }
+                            else {
+                                return this.checkCell(row+dir, col, dir);
+                            }
+                        }
+                        else if (c == Cell.SunkTop) {
+                            if (dir == 0)
+                                return this.checkCell(row+1, col, 1);
+                            else
+                                return true;
+                        }
+                        else if (c == Cell.SunkBottom) {
+                            if (dir == 0)
+                                return this.checkCell(row-1, col, -1);
+                            else
+                                return true;
+                        }
+                        return false;
+                    }
+                    
+                    
+                    public boolean hitCell(int row, int col) {
+                        Cell c = cells[row][col];
+                        if (c == Cell.Water) {
+                            labelGrid[row][col].setGraphic(new ImageView(new Image("file:Images\\batt102.gif")));
+                            return false;
+                        }
+                        else if (c == Cell.SunkHor || c == Cell.SunkLeft || c == Cell.SunkRight 
+                                || c == Cell.SunkVer || c == Cell.SunkTop || c == Cell.SunkBottom) {
+                            return false;
                         }
                         else {
-                            message += "ERROR " + c;
-                        }*/
-                        System.out.println(message + " '" + c + "'");
-                        return shipWasHit;
+                            labelGrid[row][col].setGraphic(new ImageView(new Image("file:Images\\batt103.gif")));
+                            cells[row][col] = c == Cell.ShipHor    ? Cell.SunkHor 
+                                            : c == Cell.ShipLeft   ? Cell.SunkLeft
+                                            : c == Cell.ShipRight  ? Cell.SunkRight
+                                            : c == Cell.ShipVer    ? Cell.SunkVer
+                                            : c == Cell.ShipTop    ? Cell.SunkTop
+                                            : c == Cell.ShipBottom ? Cell.SunkBottom
+                                            : Cell.Water;
+                            return true;
+                        }
                     }
+                    
+                    
                 });
             }
         }
@@ -115,6 +213,7 @@ public class Midterm extends Application {
         for (int row = 0; row < GRIDSIZE; row++) {
             for (int col = 0; col < GRIDSIZE; col++) {
                 charGrid[row][col] = 'O';
+                cells[row][col] = Cell.Water;
             }
         }
     }
@@ -122,10 +221,10 @@ public class Midterm extends Application {
     private void createPlayerPanel() {
         // Sets the background and style of each cell in the 2d array of labels.
         // And places them in the screen by adding them to a gridPane.
-        gamePane.setStyle("-fx-background-color:#0000FF;");
+        gamePane.setStyle("-fx-background-color:#FF00FF;");
         for(int row = 0; row < GRIDSIZE; row++) {
             for(int col = 0; col < GRIDSIZE; col++) {
-                labelGrid[row][col] = new Label();               
+                labelGrid[row][col] = new Label();
                 labelGrid[row][col].setGraphic(new ImageView(new Image("file:Images\\batt100.gif")));
                 labelGrid[row][col].setMaxSize(16.0, 16.0);
                 labelGrid[row][col].setStyle("-fx-border-width:1;-fx-border-color:black;");
@@ -205,36 +304,34 @@ public class Midterm extends Application {
     }
     
     private void placePiece(Ship ship, int row, int col, int index) {
-        // Get the image of that ship's piece that goes in this cell.
-        // Place the image in the grid. Update the char grid too.
+        // Place the image of that ship's piece that goes in this cell.
         labelGrid[row][col].setGraphic(ship.getImageView(index));
         
+        // Update the Cell grid.
         if (ship.getOrientation() == 'H') {
             if (ship.getDirection() == 1) {
-                charGrid[row][col] = index == 0 ? '<' 
-                        : index == ship.length()-1 ? '>' 
-                        : '-';
+                cells[row][col] = index == 0 ? Cell.ShipLeft
+                        : index == ship.length()-1 ? Cell.ShipRight
+                        : Cell.ShipHor;
             }
             else {
-                charGrid[row][col] = index == 0 ? '>' 
-                        : index == ship.length()-1 ? '<' 
-                        : '-';
+                cells[row][col] = index == 0 ? Cell.ShipRight
+                        : index == ship.length()-1 ? Cell.ShipLeft
+                        : Cell.ShipHor;
             }
         }
         else {
             if (ship.getDirection() == 1) {
-                charGrid[row][col] = index == 0 ? '^' 
-                        : index == ship.length()-1 ? 'v' 
-                        : '|';
+                cells[row][col] = index == 0 ? Cell.ShipTop
+                        : index == ship.length()-1 ? Cell.ShipBottom
+                        : Cell.ShipVer;
             }
             else {
-                charGrid[row][col] = index == 0 ? 'v' 
-                        : index == ship.length()-1 ? '^' 
-                        : '|';
+                cells[row][col] = index == 0 ? Cell.ShipBottom
+                        : index == ship.length()-1 ? Cell.ShipTop
+                        : Cell.ShipVer;
             }
         }
-        System.out.println(charGrid[row][col]);
-        //charGrid[row][col] = ship.getName().charAt(0);
     }
     
     private int checkCells(Ship ship, int row, int col) {
@@ -258,13 +355,13 @@ public class Midterm extends Application {
         // If a cell is is outside the grid or if there's already something in 
         // that cell, that direction cannot be used to place the ship.
         for (int i = 0; i < ship.length(); i++) {
-            if (row + i >= GRIDSIZE || charGrid[row+i][col] != 'O')
+            if (row + i >= GRIDSIZE || cells[row+i][col] != Cell.Water)
                 down = false;
-            if (row - i < 0 || charGrid[row-i][col] != 'O')
+            if (row - i < 0 || cells[row-i][col] != Cell.Water)
                 up = false;
-            if (col + i >= GRIDSIZE || charGrid[row][col+i] != 'O')
+            if (col + i >= GRIDSIZE || cells[row][col+i] != Cell.Water)
                 right = false;
-            if (col - i < 0 || charGrid[row][col-i] != 'O')
+            if (col - i < 0 || cells[row][col-i] != Cell.Water)
                 left = false;
         }
         
@@ -273,10 +370,9 @@ public class Midterm extends Application {
         //        0 : ship's pieces cannot be placed in any direction from this row-column
         if (right || down)
             return 1;
-        else if (left || up)
+        if (left || up)
             return -1;
-        else
-            return 0;
+        return 0;
     }
     
     /*

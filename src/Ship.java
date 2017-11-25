@@ -8,8 +8,8 @@ public class Ship
 {
     private static final int IMAGESHIP = 10;
     private static final int IMAGESUNK = 10;
-    private static final Image[] imagesShip = new Image[IMAGESHIP];
-    private static final Image[] imagesSunk = new Image[IMAGESUNK];
+    protected static final Image[] imagesShip = new Image[IMAGESHIP];
+    protected static final Image[] imagesSunk = new Image[IMAGESUNK];
     
     protected String name;
     protected char orientation;
@@ -99,5 +99,9 @@ public class Ship
     
     static public ImageView getMissImageView() {
         return new ImageView(new Image("file:Images\\batt102.gif"));
+    }
+    
+    public void sink() {
+        
     }
 }
