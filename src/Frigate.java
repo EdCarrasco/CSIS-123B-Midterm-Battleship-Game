@@ -2,17 +2,9 @@ package midterm;
 
 import javafx.scene.image.ImageView;
 
-public class Frigate extends Ship {
-    
-    private final int[] indexH = {0,4};
-    private final int[] indexV = {5,9};
-
+public class Frigate extends Ship 
+{
     Frigate(char orientation) {
-        super("Frigate   ", orientation, 2);
-        
-        if (this.orientation == 'H')
-            this.initPieces(indexH);
-        else
-            this.initPieces(indexV);
+        super("Frigate", orientation, 3);
     }
 }
