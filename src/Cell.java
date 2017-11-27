@@ -4,7 +4,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Piece extends Label
+public class Cell extends Label
 {
     private static final Image water = new Image("file:Images\\batt100.gif");
     private static final Image wave = new Image("file:Images\\batt102.gif");
@@ -30,13 +30,19 @@ public class Piece extends Label
     private int index;
     private boolean sunk;
     
-    Piece() {
+    Cell() {
         this(null, -1);
     }
     
-    Piece(Ship ship, int index) {
+    Cell(Ship ship, int index) {
         this.ship = ship;
         this.index = index;
+        this.sunk = false;
+    }
+    
+    public void reset() {
+        this.ship = null;
+        this.index = -1;
         this.sunk = false;
     }
     
@@ -47,7 +53,7 @@ public class Piece extends Label
     }
     
     public void update() {
-        // Determine the graphic that corresponds to this Piece of the Ship.
+        // Determine the graphic that corresponds to this Cell of the Ship.
         Image image;
         if (this.index == -1) {
             if (this.sunk)
@@ -57,17 +63,17 @@ public class Piece extends Label
         }
         else {
             if (this.ship.isSunk()) {
-                image = this.index == 0 ? Piece.sternSunk 
-                      : this.index == this.ship.length()-1 ? Piece.bowSunk 
-                      : Piece.deckSunk[index-1];
+                image = this.index == 0 ? Cell.sternSunk 
+                      : this.index == this.ship.length()-1 ? Cell.bowSunk 
+                      : Cell.deckSunk[index-1];
             }
             else if (this.sunk) {
-                image = Piece.explosion;
+                image = Cell.explosion;
             }
             else {
-                image = this.index == 0 ? Piece.stern 
-                      : this.index == this.ship.length()-1 ? Piece.bow 
-                      : Piece.deck[index-1];
+                image = this.index == 0 ? Cell.stern 
+                      : this.index == this.ship.length()-1 ? Cell.bow 
+                      : Cell.deck[index-1];
             }
         }
         ImageView imgView = new ImageView(image);
@@ -95,16 +101,35 @@ public class Piece extends Label
         return this.sunk;
     }
     
-    public void click() {
-        // Sink this piece of the ship
-        this.sunk = true;
-        this.update();
-        
+    public boolean click() {
+        // If the piece is water, update to wave graphic
+        if (this.index == -1) {
+            this.sunk = true;
+            this.update();
+            return false;
+        }
+        // If the piece is already sunk, return false ("missed")
+        else if (this.sunk) {
+            return false;
+        }
+        // If the pice is not sunk, return true ("hit")
+        else {
+            this.sunk = true;
+            this.update();
+            return true;
+        }
+            
+    }
+    
+    public boolean checkShip() {
         // Check if the rest of the ship has also been sunk
         if (this.ship != null && this.ship.isSunk()) {
             this.ship.update();
             System.out.println(this.ship.getName() + " has been sunk!");
+            return true;
         }
+        else
+            return false;
     }
     
     public int getIndex() {

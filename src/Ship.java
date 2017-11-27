@@ -9,19 +9,19 @@ public class Ship
     protected String name;
     protected char orientation;
     protected int direction;
-    private Piece[] pieces;
+    private Cell[] pieces;
     
     // Constructors
     
     protected Ship(String name, char orientation, int size) {
         this.name = name;
         this.orientation = orientation;
-        this.pieces = new Piece[size];
+        this.pieces = new Cell[size];
     }
     
     // Mutators
     
-    public void attachPieces(Piece[][] labelGrid, int row, int col) {
+    public void attachPieces(Cell[][] labelGrid, int row, int col) {
         if (this.getOrientation() == 'H') {
             for(int i = 0, c = col; i < this.length(); c += this.direction, i++) {  
                 labelGrid[row][c].linkToShip(this, i);
@@ -34,12 +34,12 @@ public class Ship
         }
     }
     
-    public void addPiece(Piece piece, int index) {
+    public void addPiece(Cell piece, int index) {
         this.pieces[index] = piece;
     }
     
     public void update() {
-        for (Piece piece : this.pieces) {
+        for (Cell piece : this.pieces) {
             piece.update();
         }
     }
@@ -67,7 +67,7 @@ public class Ship
     }
     
     public boolean isSunk() {
-        for (Piece piece : this.pieces) {
+        for (Cell piece : this.pieces) {
             if (!piece.isSunk())
                 return false;
         }
